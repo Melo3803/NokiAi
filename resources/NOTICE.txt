@@ -1,0 +1,15 @@
+noki Ai includes the QR decoding portions of ZXing Core 1.7.
+ZXing is Copyright 2007-2011 ZXing authors and contributors.
+Project: https://github.com/zxing/zxing
+License: Apache License, Version 2.0 (licenses/Apache-2.0.txt).
+
+ZXing sources are recompiled for CLDC 1.1 / MIDP 2.0 with Java 1.1 class files.
+No ZXing source functionality is changed. Unused formats and encoding code
+are removed by ProGuard. Original author/copyright headers remain in the
+source distribution downloaded by the reproducible build.
+
+Build-time tools (not bundled as implementations): Eclipse ECJ 4.6.1,
+ProGuard 6.2.2, MicroEmulator API libraries 2.0.4.
+
+The separate offline QR helper uses qrcode-generator 1.4.4 by Kazuhiko Arase,
+under the MIT license included in that HTML file.
