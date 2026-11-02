@@ -53,9 +53,9 @@ final class HomeScreen extends GlassCanvas {
         if (totalHeight > 0) totalHeight -= 9;
         scroll = Math.max(0, Math.min(scroll, maxScroll()));
     }
-    protected String eyebrow() { return pending == null ? "GEMINI" : "BAĞLANIYOR"; }
+    protected String eyebrow() { return pending == null ? "GEMINI" : "CONNECTING"; }
     protected Command primaryCommand() { return pending == null ? write : cancel; }
-    protected String centerLabel() { return pending == null ? (bubbles.size() == 0 ? "Seç" : "↑  ↓") : "Bekle"; }
+    protected String centerLabel() { return pending == null ? (bubbles.size() == 0 ? "Select" : "↑  ↓") : "Wait"; }
     protected void select() { if (pending == null && bubbles.size() == 0 && focus == 1) fire(talk); else fire(primaryCommand()); }
     protected void navigate(int action) {
         if (bubbles.size() == 0) {
@@ -78,7 +78,7 @@ final class HomeScreen extends GlassCanvas {
                 if (y + b.height >= TOP && y <= TOP + viewportHeight() + 6) {
                     int x = b.user ? getWidth() - b.width - 13 : 12;
                     theme.panel(g, x, y, b.width, b.height, b.user);
-                    GlassTheme.text(g, b.notice ? "BİLGİ" : (b.user ? "SEN" : "noki Ai"), x + 12, y + 9, GlassTheme.BOLD,
+                    GlassTheme.text(g, b.notice ? "INFO" : (b.user ? "YOU" : "noki Ai"), x + 12, y + 9, GlassTheme.BOLD,
                         b.user || !b.notice ? GlassTheme.MINT : GlassTheme.MUTED);
                     GlassTheme.lines(g, b.lines, x + 12, y + 15 + GlassTheme.BOLD.getHeight(), GlassTheme.SMALL,
                         b.notice ? GlassTheme.MUTED : GlassTheme.INK);
@@ -97,7 +97,7 @@ final class HomeScreen extends GlassCanvas {
             for (int i = 0; i < 3; i++) {
                 g.setColor(i == pulse % 3 ? GlassTheme.MINT : 0x426372); g.fillArc(13 + i * 7, y + 10, 3, 3, 0, 360);
             }
-            String label = pending.operation == NetworkTask.TTS ? "Yanıt seslendiriliyor" : (pending.listModels || pending.connectionTest ? "Bağlantı kontrol ediliyor" : "Yanıt hazırlanıyor");
+            String label = pending.operation == NetworkTask.TTS ? "Creating speech" : (pending.listModels || pending.connectionTest ? "Checking connection" : "Thinking");
             GlassTheme.text(g, label, 42, y + 4, GlassTheme.SMALL, GlassTheme.MUTED);
         }
     }
@@ -105,16 +105,16 @@ final class HomeScreen extends GlassCanvas {
         int top = TOP + 7, bottom = getHeight() - FOOT - 7 - (pending == null ? 0 : 25);
         int tileHeight = 41, heroHeight = Math.max(62, bottom - top - tileHeight - 8);
         theme.panel(g, 12, top, getWidth() - 24, heroHeight, false);
-        GlassTheme.text(g, "BİR FİKİRLE BAŞLAR", 25, top + 11, GlassTheme.BOLD, GlassTheme.MINT);
-        GlassTheme.text(g, "Aklında ne var?", 24, top + 30, GlassTheme.HERO, GlassTheme.INK);
+        GlassTheme.text(g, "START WITH AN IDEA", 25, top + 11, GlassTheme.BOLD, GlassTheme.MINT);
+        GlassTheme.text(g, "What's on your mind?", 24, top + 30, GlassTheme.HERO, GlassTheme.INK);
         GlassTheme.sparkle(g, getWidth() - 49, top + 30, 0x98ACC9);
-        String hint = status.length() > 0 ? status : (config.key.length() == 0 ? "Anahtarını Ayarlar'dan ekle.\nİlk sohbetine birlikte başlayalım." : "Bir soru sor, bir fikir keşfet.\nYazarak ya da sesinle.");
+        String hint = status.length() > 0 ? status : (config.key.length() == 0 ? "Add your API key in Settings.\nThen start your first conversation." : "Ask a question. Explore an idea.\nType it or say it.");
         int textY = top + 33 + GlassTheme.HERO.getHeight();
         if (textY + GlassTheme.SMALL.getHeight() * 2 + 7 <= top + heroHeight)
             GlassTheme.lines(g, GlassTheme.wrap(hint, GlassTheme.SMALL, getWidth() - 57), 25, textY, GlassTheme.SMALL, GlassTheme.MUTED);
         int y = bottom - tileHeight, gap = 8, tileWidth = (getWidth() - 24 - gap) / 2;
-        actionTile(g, 12, y, tileWidth, tileHeight, "Soru yaz", 0, focus == 0);
-        actionTile(g, 12 + tileWidth + gap, y, tileWidth, tileHeight, "Sesle sor", 1, focus == 1);
+        actionTile(g, 12, y, tileWidth, tileHeight, "Write", 0, focus == 0);
+        actionTile(g, 12 + tileWidth + gap, y, tileWidth, tileHeight, "Speak", 1, focus == 1);
     }
     private void actionTile(Graphics g, int x, int y, int w, int h, String label, int icon, boolean selected) {
         theme.panel(g, x, y, w, h, selected);

@@ -11,12 +11,12 @@ STAGE = EXPORTS / 'noki-ai-github'
 ARCHIVE = EXPORTS / 'noki-ai-github.zip'
 
 FILES = [
-    '.gitignore', '.gitattributes', 'LICENSE', 'README.md', 'README_TR.md',
+    '.gitignore', '.gitattributes', 'LICENSE', 'README.md',
     'CHANGELOG.md', 'CONTRIBUTING.md', 'THIRD_PARTY.md', 'requirements-dev.txt',
-    'build.ps1', 'test.ps1', 'tools/qrcode.js', 'tools/anahtar-qr.template.html',
+    'build.ps1', 'test.ps1', 'tools/qrcode.js', 'tools/key-qr.template.html',
     'tools/make_icon.py', 'tools/package_project.py',
     'dist/NokiAi.jar', 'dist/NokiAi.jad', 'dist/NokiAi-E63.zip',
-    'dist/anahtar-qr.html', 'dist/KURULUM.md',
+    'dist/key-qr.html',
     'docs/images/home.png', 'docs/images/voice.png',
     'docs/images/chat.png', 'docs/images/settings.png', 'docs/images/menu.png',
 ]

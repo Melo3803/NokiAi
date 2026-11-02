@@ -31,21 +31,21 @@ public final class Config {
     }
     /** QR contents are data only: no URL is ever opened or downloaded. */
     public static Config fromQr(String payload) throws IOException {
-        if (payload == null || payload.length() > 2048) throw new IOException("QR içeriği çok uzun.");
+        if (payload == null || payload.length() > 2048) throw new IOException("QR content is too long.");
         String text = payload.trim(); Config result = new Config();
         if (text.startsWith("{")) {
             Hashtable map = Json.object(Json.parse(text));
             result.key = Json.text(map.get("apiKey")).trim();
             String model = Json.text(map.get("model")).trim();
             if (model.length() > 0) {
-                if (!validModel(model)) throw new IOException("QR model adı geçersiz.");
+                if (!validModel(model)) throw new IOException("Invalid model name in QR.");
                 result.model = model;
             }
         } else {
             if (text.startsWith("gemini:")) text = text.substring(7).trim();
             result.key = text;
         }
-        if (!validKey(result.key)) throw new IOException("QR içinde geçerli bir API anahtarı bulunamadı.");
+        if (!validKey(result.key)) throw new IOException("No valid API key found in QR.");
         return result;
     }
 }

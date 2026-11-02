@@ -12,30 +12,30 @@ public final class ConnectionFailure {
             byte reason = ((CertificateException) failure).getReason();
             if (reason == CertificateException.EXPIRED || reason == CertificateException.NOT_YET_VALID
                     || reason == CertificateException.ROOT_CA_EXPIRED)
-                advice = "Sertifika tarihi doğrulanamadı. Önce telefonun tarih ve saatini kontrol et. "
-                    + "Tarih doğruysa sertifika deposunun güncellenmesi gerekebilir.";
+                advice = "Could not verify the certificate date. Check the phone's date and time first. "
+                    + "If they are correct, the certificate store may need an update.";
             else if (reason == CertificateException.UNRECOGNIZED_ISSUER || reason == CertificateException.BROKEN_CHAIN)
-                advice = "Google sertifikasının yayıncısı/zinciri tanınmadı. Telefonun kök sertifika veya TLS desteği eski olabilir.";
-            else advice = "Google sertifikası doğrulanamadı (neden " + reason + "). Telefon tarihi, sertifika deposu ve TLS desteğini kontrol et.";
+                advice = "Google's certificate issuer or chain is not trusted. The phone's root certificates or TLS support may be outdated.";
+            else advice = "Could not verify Google's certificate (reason " + reason + "). Check the phone's date, certificate store and TLS support.";
         } else if (failure instanceof ConnectionNotFoundException) {
-            advice = "Bağlantı açılamadı. Wi-Fi/erişim noktası ve DNS ayarlarını kontrol et; HTTPS desteği de eksik olabilir.";
+            advice = "Could not open the connection. Check Wi-Fi, access point and DNS settings. HTTPS support may also be missing.";
         } else if (failure instanceof InterruptedIOException) {
-            advice = "Bağlantı zaman aşımına uğradı. Wi-Fi ve seçili erişim noktasını kontrol et.";
+            advice = "Connection timed out. Check Wi-Fi and the selected access point.";
         } else {
-            advice = "Bağlantı tamamlanamadı. Önce Wi-Fi/erişim noktası ve telefon tarihini kontrol et. "
-                + "Native hata SSL/TLS ile ilgiliyse telefon içi TLS güncellemesi gerekebilir.";
+            advice = "Connection failed. First check Wi-Fi, the access point and the phone's date. "
+                + "If the native error mentions SSL/TLS, the phone may need a TLS update.";
         }
         String nativeText = redact(failure.getMessage(), key);
         if (nativeText.length() > 180) nativeText = nativeText.substring(0, 180);
-        return advice + "\n\nAşama: " + stage + "\nTür: " + failure.getClass().getName()
-            + (nativeText.length() == 0 ? "" : "\nCihaz: " + nativeText);
+        return advice + "\n\nStage: " + stage + "\nType: " + failure.getClass().getName()
+            + (nativeText.length() == 0 ? "" : "\nDevice: " + nativeText);
     }
     private static String redact(String text, String key) {
         if (text == null) return "";
         if (key != null && key.length() > 0) {
             StringBuffer safe = new StringBuffer(); int from = 0, at;
             while ((at = text.indexOf(key, from)) >= 0) {
-                safe.append(text.substring(from, at)); safe.append("[anahtar gizlendi]"); from = at + key.length();
+                safe.append(text.substring(from, at)); safe.append("[key hidden]"); from = at + key.length();
             }
             safe.append(text.substring(from)); text = safe.toString();
         }

@@ -57,13 +57,13 @@ public final class CoreTest {
         history.clear(); check(history.size() == 0, "New chat clears context");
         String response = "{\"candidates\":[{\"content\":{\"parts\":[{\"thought\":true,\"text\":\"hidden\"},{\"text\":\"Merhaba \"},{\"text\":\"dünya!\"}]},\"finishReason\":\"STOP\"}]}";
         check(GoogleResponse.answer(response).equals("Merhaba dünya!"), "Only visible text parts shown");
-        check(GoogleResponse.answer(response.replace("STOP", "MAX_TOKENS")).contains("sınırına"), "Truncation explained");
+        check(GoogleResponse.answer(response.replace("STOP", "MAX_TOKENS")).contains("Reply limit"), "Truncation explained");
         rejected = false; try { GoogleResponse.answer(response.replace("STOP", "SAFETY")); } catch (IOException expected) { rejected = true; }
         check(rejected, "Blocked answer handled");
         rejected = false; try { GoogleResponse.answer("{\"promptFeedback\":{\"blockReason\":\"SAFETY\"}}"); } catch (IOException expected) { rejected = true; }
         check(rejected, "Missing candidates handled");
-        check(GoogleResponse.error(429).contains("Kota"), "Quota error");
-        check(GoogleResponse.error(403).contains("anahtarı"), "Authentication error");
+        check(GoogleResponse.error(429).contains("Quota"), "Quota error");
+        check(GoogleResponse.error(403).contains("API key"), "Authentication error");
         check(GoogleResponse.error(404).contains("Model"), "Missing model error");
         check(GoogleResponse.error(503).contains("Google"), "Service error");
         System.out.println("PASS: " + count + " core checks");

@@ -13,10 +13,10 @@ public final class Json {
         return parse(text, 65536);
     }
     public static Object parse(String text, int limit) throws IOException {
-        if (text == null || limit < 1 || limit > 2 * 1024 * 1024 || text.length() > limit) throw new IOException("JSON boyutu uygun değil.");
+        if (text == null || limit < 1 || limit > 2 * 1024 * 1024 || text.length() > limit) throw new IOException("Invalid JSON size.");
         Json p = new Json(text);
         Object value = p.value(0); p.space();
-        if (p.at != text.length()) throw new IOException("Geçersiz JSON sonu.");
+        if (p.at != text.length()) throw new IOException("Invalid JSON ending.");
         return value;
     }
     private void space() {
@@ -24,7 +24,7 @@ public final class Json {
             || source.charAt(at) == '\r' || source.charAt(at) == '\n')) at++;
     }
     private Object value(int depth) throws IOException {
-        if (depth > 24) throw new IOException("JSON çok derin.");
+        if (depth > 24) throw new IOException("JSON is nested too deeply.");
         space();
         if (at >= source.length()) throw new IOException("Eksik JSON.");
         char c = source.charAt(at);
@@ -34,7 +34,7 @@ public final class Json {
             if (take('}')) return map;
             do {
                 space();
-                if (at >= source.length() || source.charAt(at) != '"') throw new IOException("JSON alanı eksik.");
+                if (at >= source.length() || source.charAt(at) != '"') throw new IOException("Missing JSON field.");
                 String key = string(); space(); require(':');
                 Object item = value(depth + 1);
                 if (item != null) map.put(key, item);
@@ -53,15 +53,15 @@ public final class Json {
         if (literal("false")) return Boolean.FALSE;
         if (literal("null")) return null;
         int start = at;
-        if (take('-') && at >= source.length()) throw new IOException("Geçersiz sayı.");
+        if (take('-') && at >= source.length()) throw new IOException("Invalid number.");
         if (!take('0')) {
-            if (at >= source.length() || source.charAt(at) < '1' || source.charAt(at) > '9') throw new IOException("Geçersiz JSON.");
+            if (at >= source.length() || source.charAt(at) < '1' || source.charAt(at) > '9') throw new IOException("Invalid JSON.");
             digits();
         }
-        if (take('.')) { int before = at; digits(); if (at == before) throw new IOException("Geçersiz sayı."); }
+        if (take('.')) { int before = at; digits(); if (at == before) throw new IOException("Invalid number."); }
         if (take('e') || take('E')) {
             if (!take('+')) take('-'); int before = at; digits();
-            if (at == before) throw new IOException("Geçersiz üs.");
+            if (at == before) throw new IOException("Invalid exponent.");
         }
         return source.substring(start, at);
     }
@@ -73,7 +73,7 @@ public final class Json {
     private boolean take(char c) {
         if (at < source.length() && source.charAt(at) == c) { at++; return true; } return false;
     }
-    private void require(char c) throws IOException { if (!take(c)) throw new IOException("JSON ayırıcı eksik."); }
+    private void require(char c) throws IOException { if (!take(c)) throw new IOException("Missing JSON separator."); }
     private String string() throws IOException {
         require('"'); StringBuffer out = new StringBuffer();
         while (at < source.length()) {
@@ -81,25 +81,25 @@ public final class Json {
             if (c == '"') return out.toString();
             if (c < 32) throw new IOException("JSON kontrol karakteri.");
             if (c == '\\') {
-                if (at >= source.length()) throw new IOException("JSON kaçışı eksik.");
+                if (at >= source.length()) throw new IOException("Incomplete JSON escape.");
                 c = source.charAt(at++);
                 if (c == 'n') c = '\n'; else if (c == 'r') c = '\r'; else if (c == 't') c = '\t';
                 else if (c == 'b') c = '\b'; else if (c == 'f') c = '\f';
                 else if (c == 'u') {
-                    if (at + 4 > source.length()) throw new IOException("Unicode kaçışı eksik.");
+                    if (at + 4 > source.length()) throw new IOException("Incomplete Unicode escape.");
                     int code = 0;
                     for (int i = 0; i < 4; i++) {
                         char d = source.charAt(at++);
                         int n = "0123456789abcdef".indexOf(Character.toLowerCase(d));
-                        if (n < 0) throw new IOException("Geçersiz Unicode kaçışı.");
+                        if (n < 0) throw new IOException("Invalid Unicode escape.");
                         code = code * 16 + n;
                     }
                     c = (char) code;
-                } else if (c != '"' && c != '\\' && c != '/') throw new IOException("Geçersiz JSON kaçışı.");
+                } else if (c != '"' && c != '\\' && c != '/') throw new IOException("Invalid JSON escape.");
             }
             out.append(c);
         }
-        throw new IOException("JSON metni tamamlanmadı.");
+        throw new IOException("Incomplete JSON string.");
     }
     public static String quote(String value) {
         StringBuffer out = new StringBuffer("\"");

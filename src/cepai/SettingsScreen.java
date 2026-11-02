@@ -10,33 +10,33 @@ final class SettingsScreen extends GlassCanvas implements CommandListener {
     private int selected, first;
     private TextBox editor;
     private TextField editing;
-    private final Command done = new Command("Tamam", Command.OK, 1);
-    private final Command back = new Command("Geri", Command.BACK, 1);
+    private final Command done = new Command("Done", Command.OK, 1);
+    private final Command back = new Command("Back", Command.BACK, 1);
 
     SettingsScreen(CepAiMIDlet app, TextField key, TextField model, TextField tts, ChoiceGroup remember, ChoiceGroup voice) {
         this.app = app; this.key = key; this.model = model; this.tts = tts; this.remember = remember; this.voice = voice;
         setCommandListener(this);
     }
-    protected String heading() { return "Ayarlar"; }
+    protected String heading() { return "Settings"; }
     protected String eyebrow() { return "noki Ai"; }
-    protected String centerLabel() { return "Düzenle"; }
+    protected String centerLabel() { return "Edit"; }
     private int rows() { return Math.max(1, (getHeight() - FOOT - TOP - 10) / 44); }
     private String title(int index) {
         switch (index) {
-            case 0: return "Google API anahtarı";
-            case 1: return "Sohbet modeli";
-            case 2: return "Anahtarı hatırla";
-            case 3: return "Seslendirme modeli";
-            default: return "Sesli yanıt";
+            case 0: return "Google API key";
+            case 1: return "Chat model";
+            case 2: return "Remember key";
+            case 3: return "Voice model";
+            default: return "Voice replies";
         }
     }
     private String value(int index) {
         switch (index) {
-            case 0: return key.getString().length() == 0 ? "Eklemek için seç • QR: Menü" : "Anahtar eklendi • değiştirmek için seç";
+            case 0: return key.getString().length() == 0 ? "Select to add • QR: Menu" : "Key added • select to change";
             case 1: return model.getString();
-            case 2: return remember.isSelected(0) ? "Açık • şifrelenmeden saklanır" : "Kapalı • yalnızca bu oturum";
+            case 2: return remember.isSelected(0) ? "On • stored without encryption" : "Off • this session only";
             case 3: return tts.getString();
-            default: return voice.isSelected(0) ? "Açık • ayrı bir TTS isteği kullanır" : "Kapalı • yalnızca metin";
+            default: return voice.isSelected(0) ? "On • uses a separate TTS request" : "Off • text only";
         }
     }
     protected void content(Graphics g) {
@@ -52,7 +52,7 @@ final class SettingsScreen extends GlassCanvas implements CommandListener {
         }
         int y = TOP + 6 + visible * 44;
         if (y + GlassTheme.SMALL.getHeight() < getHeight() - FOOT)
-            GlassTheme.text(g, (selected + 1) + "/5  •  ↑ ↓ gezin  •  QR ve modeller: Menü", 15, y + 1, GlassTheme.SMALL, GlassTheme.MUTED);
+            GlassTheme.text(g, (selected + 1) + "/5  •  ↑ ↓ move  •  QR and models: Menu", 15, y + 1, GlassTheme.SMALL, GlassTheme.MUTED);
     }
     protected void navigate(int action) {
         if (action == UP) selected = Math.max(0, selected - 1);

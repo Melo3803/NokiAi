@@ -10,7 +10,7 @@ size = int(re.search(r'^MIDlet-Jar-Size: (\d+)', jad, re.M).group(1))
 assert jar.stat().st_size == size
 assert re.search(r'^MIDlet-Name: noki Ai\r?$', jad, re.M)
 assert re.search(r'^MIDlet-1: noki Ai, /icon.png, cepai.CepAiMIDlet\r?$', jad, re.M)
-assert re.search(r'^MIDlet-Version: 1\.2\.0\r?$', jad, re.M)
+assert re.search(r'^MIDlet-Version: 1\.2\.1\r?$', jad, re.M)
 assert re.search(r'^MIDlet-Jar-URL: NokiAi.jar\r?$', jad, re.M)
 with zipfile.ZipFile(jar) as archive:
     manifest = archive.read('META-INF/MANIFEST.MF').decode('ascii')
@@ -29,7 +29,7 @@ with zipfile.ZipFile(jar) as archive:
     assert stack_maps > 0
     assert 'licenses/Apache-2.0.txt' in archive.namelist()
     assert archive.read('LICENSE').startswith(b'MIT License')
-html = (root / 'dist' / 'anahtar-qr.html').read_text('utf-8')
+html = (root / 'dist' / 'key-qr.html').read_text('utf-8')
 assert '/* QR_LIBRARY */' not in html
 assert "connect-src 'none'" in html
 assert '<script src=' not in html

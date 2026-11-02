@@ -14,19 +14,19 @@ final class FileBrowser implements CommandListener {
     private final Vector paths = new Vector();
     private List list;
     private volatile boolean closed;
-    private final Command back = new Command("Geri", Command.BACK, 1);
+    private final Command back = new Command("Back", Command.BACK, 1);
     FileBrowser(CepAiMIDlet owner) { this(owner, false); }
     FileBrowser(CepAiMIDlet owner, boolean sound) { app = owner; audio = sound; }
     void start() { showDirectory(); }
     void close() { closed = true; }
     private void showDirectory() {
         final String target = directory;
-        app.fileStatus(this, "Klasör okunuyor…");
+        app.fileStatus(this, "Reading folder…");
         new Thread(new Runnable() { public void run() {
             FileConnection connection = null;
             try {
-                final List next = new List(target.length() == 0 ? (audio ? "Ses dosyası • sürücüler" : "QR dosyası • sürücüler")
-                    : (audio ? "Kısa WAV kaydı seç" : "QR PNG/JPG seç"), List.IMPLICIT);
+                final List next = new List(target.length() == 0 ? (audio ? "Audio file • drives" : "QR file • drives")
+                    : (audio ? "Select a short WAV" : "Select QR PNG/JPG"), List.IMPLICIT);
                 final Vector nextPaths = new Vector();
                 if (target.length() == 0) {
                     Enumeration roots = FileSystemRegistry.listRoots();
@@ -34,7 +34,7 @@ final class FileBrowser implements CommandListener {
                         String root = (String) roots.nextElement(); next.append(root, null); nextPaths.addElement(root);
                     }
                 } else {
-                    next.append(".. / üst klasör", null); nextPaths.addElement("..");
+                    next.append(".. / parent folder", null); nextPaths.addElement("..");
                     connection = (FileConnection) Connector.open("file:///" + target, Connector.READ);
                     Enumeration entries = connection.list();
                     while (entries.hasMoreElements() && nextPaths.size() < 250) {
@@ -53,12 +53,12 @@ final class FileBrowser implements CommandListener {
                     app.fileDisplay(FileBrowser.this, list);
                 }});
             } catch (Exception unavailable) {
-                app.fileError(FileBrowser.this, "Klasör açılamadı. Dosya okuma iznini kontrol et.");
+                app.fileError(FileBrowser.this, "Could not open the folder. Check file read permission.");
             } finally { if (connection != null) try { connection.close(); } catch (IOException ignored) { } }
         }}).start();
     }
     private void read(final String path) {
-        app.fileStatus(this, audio ? "Ses dosyası okunuyor…" : "QR görseli okunuyor…");
+        app.fileStatus(this, audio ? "Reading audio file…" : "Reading QR image…");
         new Thread(new Runnable() { public void run() {
             FileConnection file = null; InputStream input = null;
             try {
@@ -82,8 +82,8 @@ final class FileBrowser implements CommandListener {
                 }
             } catch (Exception unreadable) {
                 if (!closed) app.fileError(FileBrowser.this, audio
-                    ? "Ses okunamadı. En fazla 20 saniye / 768 KiB PCM WAV ve dosya okuma izni gerekli. Ses Kaydedici kalitesini Yüksek seç."
-                    : "QR okunamadı. Net bir PNG/JPG ve dosya okuma izni gerekiyor.");
+                    ? "Could not read audio. Use a PCM WAV under 20 seconds / 768 KiB and allow file access. Set Recorder quality to High."
+                    : "Could not read the QR. Use a clear PNG/JPG and allow file access.");
             } finally {
                 if (input != null) try { input.close(); } catch (IOException ignored) { }
                 if (file != null) try { file.close(); } catch (IOException ignored) { }

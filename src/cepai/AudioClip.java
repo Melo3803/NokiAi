@@ -11,14 +11,14 @@ public final class AudioClip {
     public static AudioClip fromWav(byte[] input, int maxMillis) throws IOException {
         if (input == null || input.length < 44 || input.length > 1536000
                 || !tag(input, 0, "RIFF") || !tag(input, 8, "WAVE"))
-            throw new IOException("PCM WAV kaydı gerekli. Telefonun Ses Kaydedici'sinde kaliteyi Yüksek seç.");
+            throw new IOException("A PCM WAV recording is required. Set the phone's Recorder quality to High.");
         int format = 0, channels = 0, rate = 0, bits = 0, align = 0, dataAt = -1, size = 0;
         int declared = little32(input, 4);
-        if (declared < 36 || declared > input.length - 8) throw new IOException("WAV kaydı tamamlanmamış.");
+        if (declared < 36 || declared > input.length - 8) throw new IOException("Incomplete WAV recording.");
         int end = declared + 8;
         for (int at = 12; at <= end - 8;) {
             int length = little32(input, at + 4), body = at + 8;
-            if (length < 0 || length > end - body) throw new IOException("WAV parçası eksik.");
+            if (length < 0 || length > end - body) throw new IOException("Incomplete WAV chunk.");
             if (tag(input, at, "fmt ") && length >= 16) {
                 format = little16(input, body); channels = little16(input, body + 2);
                 rate = little32(input, body + 4); align = little16(input, body + 12); bits = little16(input, body + 14);
@@ -27,11 +27,11 @@ public final class AudioClip {
         }
         if (format != 1 || (channels != 1 && channels != 2) || (bits != 8 && bits != 16)
                 || rate < 8000 || rate > 48000 || align != channels * bits / 8 || dataAt < 0 || size < align)
-            throw new IOException("Bu WAV biçimi desteklenmiyor. 8/16-bit PCM kayıt gerekli.");
+            throw new IOException("Unsupported WAV format. Use 8/16-bit PCM audio.");
         int frames = size / align;
         long duration = (long) frames * 1000 / rate;
-        if (duration > maxMillis) throw new IOException("Ses çok uzun. En fazla " + (maxMillis / 1000) + " saniyelik kayıt seç.");
-        if (duration < 200) throw new IOException("Kayıt çok kısa. Biraz daha konuşup yeniden dene.");
+        if (duration > maxMillis) throw new IOException("Audio is too long. Choose a recording of up to " + (maxMillis / 1000) + " seconds.");
+        if (duration < 200) throw new IOException("Recording is too short. Speak a little longer and try again.");
         int outputFrames = (int) ((long) frames * 8000 / rate);
         byte[] output = header(outputFrames * 2, 8000);
         for (int i = 0; i < outputFrames; i++) {
@@ -49,7 +49,7 @@ public final class AudioClip {
         return new AudioClip(output, (int) duration);
     }
     public static AudioClip fromPcm(byte[] pcm, int rate, int maxMillis) throws IOException {
-        if (pcm.length == 0 || (pcm.length & 1) != 0 || pcm.length > 1535956) throw new IOException("PCM ses eksik veya çok büyük.");
+        if (pcm.length == 0 || (pcm.length & 1) != 0 || pcm.length > 1535956) throw new IOException("PCM audio is incomplete or too large.");
         byte[] wav = header(pcm.length, rate); System.arraycopy(pcm, 0, wav, 44, pcm.length);
         return fromWav(wav, maxMillis);
     }

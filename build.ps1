@@ -40,12 +40,12 @@ if ($LASTEXITCODE -ne 0) { throw 'Java ME compilation failed' }
 $manifest = @"
 Manifest-Version: 1.0
 MIDlet-Name: noki Ai
-MIDlet-Version: 1.2.0
+MIDlet-Version: 1.2.1
 MIDlet-Vendor: Buza
 MIDlet-1: noki Ai, /icon.png, cepai.CepAiMIDlet
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
-MIDlet-Description: Nokia E63 icin dogrudan Gemini sohbeti
+MIDlet-Description: A lightweight Gemini AI client for Java ME phones
 MIDlet-Permissions: javax.microedition.io.Connector.https
 MIDlet-Permissions-Opt: javax.microedition.media.control.VideoControl.getSnapshot, javax.microedition.io.Connector.file.read, javax.microedition.media.control.RecordControl
 
@@ -66,10 +66,19 @@ $jad = $manifest + "MIDlet-Jar-URL: NokiAi.jar`nMIDlet-Jar-Size: $size`n"
 [IO.File]::WriteAllText((Join-Path $dist 'NokiAi.jad'), ($jad -replace "`r?`n", "`r`n"), [Text.Encoding]::ASCII)
 $qrLibrary = Join-Path $root 'tools\qrcode.js'
 if ((Get-FileHash -LiteralPath $qrLibrary).Hash -ne '18AE399F81182BC9DE916E9C77B195DF20CC58D6F2D55A62B085A299F1BF1780') { throw 'QR generator checksum mismatch' }
-$html = [IO.File]::ReadAllText((Join-Path $root 'tools\anahtar-qr.template.html'))
+$html = [IO.File]::ReadAllText((Join-Path $root 'tools\key-qr.template.html'))
 $html = $html.Replace('/* QR_LIBRARY */', [IO.File]::ReadAllText($qrLibrary))
+[IO.File]::WriteAllText((Join-Path $dist 'key-qr.html'), $html, (New-Object Text.UTF8Encoding $false))
+# Keep the existing local QR page usable; distribute the English filename.
 [IO.File]::WriteAllText((Join-Path $dist 'anahtar-qr.html'), $html, (New-Object Text.UTF8Encoding $false))
-Copy-Item -LiteralPath (Join-Path $root 'README_TR.md') -Destination (Join-Path $dist 'KURULUM.md')
-$releaseFiles = @('NokiAi.jar','NokiAi.jad','anahtar-qr.html','KURULUM.md') | ForEach-Object { Join-Path $dist $_ }
-Compress-Archive -LiteralPath $releaseFiles -DestinationPath (Join-Path $dist 'NokiAi-E63.zip') -Force
+Copy-Item -LiteralPath (Join-Path $root 'README.md') -Destination (Join-Path $dist 'README.md')
+$release = Join-Path $build 'release'
+$images = Join-Path $release 'docs\images'
+New-Item -ItemType Directory -Force -Path $images | Out-Null
+foreach ($name in @('NokiAi.jar','NokiAi.jad','key-qr.html','README.md')) {
+    Copy-Item -LiteralPath (Join-Path $dist $name) -Destination $release
+}
+foreach ($name in @('LICENSE','THIRD_PARTY.md','CONTRIBUTING.md')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $release }
+foreach ($name in @('home.png','chat.png')) { Copy-Item -LiteralPath (Join-Path $root ('docs\images\' + $name)) -Destination $images }
+Compress-Archive -Path (Join-Path $release '*') -DestinationPath (Join-Path $dist 'NokiAi-E63.zip') -Force
 Write-Output "Ready: $output ($size bytes), CLDC 1.1 / MIDP 2.0, direct HTTPS"

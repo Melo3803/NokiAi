@@ -31,7 +31,7 @@ final class NetworkTask implements Runnable {
         this(owner, config, text, json, kind, null, null);
     }
     NetworkTask(CepAiMIDlet owner, Config config, AudioClip clip, Conversation conversation) {
-        this(owner, config, "[Sesli soru]", "", VOICE, clip, conversation);
+        this(owner, config, "[Voice question]", "", VOICE, clip, conversation);
     }
     private NetworkTask(CepAiMIDlet owner, Config config, String text, String json, int kind, AudioClip clip, Conversation conversation) {
         app = owner; key = config.key; model = kind == TTS ? config.ttsModel : config.model;
@@ -46,7 +46,7 @@ final class NetworkTask implements Runnable {
     public void run() {
         InputStream input = null; OutputStream output = null;
         String response = null, error = null;
-        String stage = "HTTPS bağlantısı açma";
+        String stage = "Opening HTTPS connection";
         try {
             String body = voice == null ? payload : history.requestVoice(voice);
             synchronized (this) {
@@ -56,8 +56,8 @@ final class NetworkTask implements Runnable {
                     public void run() {
                         timedOut = true; NetworkTask.this.cancel();
                         if (operation == TTS) app.speechResult(NetworkTask.this, null,
-                            "Seslendirme 60 saniyede tamamlanmadı. Biraz sonra tekrar dene.");
-                        else app.networkResult(NetworkTask.this, null, "Bağlantı 60 saniyede tamamlanmadı. Biraz sonra tekrar dene.");
+                            "Speech generation timed out after 60 seconds. Try again later.");
+                        else app.networkResult(NetworkTask.this, null, "Connection timed out after 60 seconds. Try again later.");
                     }
                 }, 60000);
             }
@@ -67,7 +67,7 @@ final class NetworkTask implements Runnable {
                 connection = opened;
                 if (cancelled) { opened.close(); return; }
             }
-            stage = "İstek hazırlama";
+            stage = "Preparing request";
             opened.setRequestMethod(listModels || connectionTest ? HttpConnection.GET : HttpConnection.POST);
             if (!connectionTest) opened.setRequestProperty("x-goog-api-key", key);
             opened.setRequestProperty("Accept", "application/json");
@@ -75,15 +75,15 @@ final class NetworkTask implements Runnable {
                 byte[] bytes = body.getBytes("UTF-8");
                 opened.setRequestProperty("Content-Type", "application/json; charset=utf-8");
                 opened.setRequestProperty("Content-Length", "" + bytes.length);
-                stage = "Gönderim / TLS el sıkışması";
+                stage = "Sending / TLS handshake";
                 output = opened.openOutputStream(); output.write(bytes); output.close(); output = null;
             }
-            stage = "HTTP yanıtı / TLS el sıkışması";
+            stage = "HTTP response / TLS handshake";
             int status = opened.getResponseCode();
             if (connectionTest && status >= 200 && status <= 599) response = "" + status;
             else if (status != HttpConnection.HTTP_OK) error = GoogleResponse.error(status);
             else {
-                stage = "Yanıt okuma";
+                stage = "Reading response";
                 input = opened.openInputStream();
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024]; int count;
@@ -95,11 +95,11 @@ final class NetworkTask implements Runnable {
                 response = new String(buffer.toByteArray(), "UTF-8");
             }
         } catch (SecurityException denied) {
-            error = "İnternet izni verilmedi. Telefonun uygulama erişim ayarlarından ağ iznini aç.";
+            error = "Internet permission denied. Allow network access in the phone's application settings.";
         } catch (IOException failed) {
             error = ConnectionFailure.describe(failed, stage, key);
         } catch (Exception unexpected) {
-            error = "İstek tamamlanamadı. Bağlantını ve ayarlarını kontrol edip yeniden dene.";
+            error = "Request failed. Check your connection and settings, then try again.";
         } finally {
             if (input != null) try { input.close(); } catch (IOException ignored) { }
             if (output != null) try { output.close(); } catch (IOException ignored) { }

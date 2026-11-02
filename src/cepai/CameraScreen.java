@@ -9,9 +9,9 @@ final class CameraScreen extends Canvas implements CommandListener {
     private Player player;
     private VideoControl video;
     private volatile boolean closed, busy;
-    private String status = "Kamera açılıyor…";
-    private final Command scan = new Command("Tara", Command.OK, 1);
-    private final Command back = new Command("Geri", Command.BACK, 2);
+    private String status = "Opening camera…";
+    private final Command scan = new Command("Scan", Command.OK, 1);
+    private final Command back = new Command("Back", Command.BACK, 2);
     CameraScreen(CepAiMIDlet owner) {
         app = owner; addCommand(scan); addCommand(back); setCommandListener(this);
     }
@@ -32,14 +32,14 @@ final class CameraScreen extends Canvas implements CommandListener {
                     try { video.setDisplaySize(getWidth() - 16, getHeight() - 53); }
                     catch (MediaException fixedPreview) { }
                     video.setVisible(true); player.start();
-                    status = "QR'ı göster • Orta tuş: tara";
+                    status = "Show QR • Press center to scan";
                 }
                 repaint();
             } catch (Exception unavailable) {
                 if (opened != null) try { opened.close(); } catch (Exception ignored) { }
                 close();
-                app.cameraError(CameraScreen.this, "Kamera açılamadı. Kamera iznini kontrol et. "
-                    + "Ayarlar > QR dosyası ile hafıza kartındaki QR görselini de okuyabilirsin.");
+                app.cameraError(CameraScreen.this, "Could not open the camera. Check camera permission. "
+                    + "You can also use Settings > QR file to read a QR image from the memory card.");
             }
         }}).start();
     }
@@ -50,7 +50,7 @@ final class CameraScreen extends Canvas implements CommandListener {
     }
     private synchronized void scan() {
         if (closed || busy || video == null) return;
-        busy = true; status = "Okunuyor…"; repaint();
+        busy = true; status = "Reading…"; repaint();
         new Thread(new Runnable() { public void run() {
             try {
                 VideoControl capture;
@@ -64,7 +64,7 @@ final class CameraScreen extends Canvas implements CommandListener {
                 if (!closed) { close(); app.cameraResult(CameraScreen.this, decoded); }
             } catch (Exception unreadable) {
                 if (!closed) {
-                    busy = false; status = "Okunamadı • tekrar tara"; repaint();
+                    busy = false; status = "Not recognized • scan again"; repaint();
                     app.cameraRetry(CameraScreen.this);
                 }
             }
@@ -73,7 +73,7 @@ final class CameraScreen extends Canvas implements CommandListener {
     protected void paint(Graphics g) {
         g.setColor(0x101923); g.fillRect(0, 0, getWidth(), getHeight());
         g.setColor(0x70DEB4); g.setFont(Font.getDefaultFont());
-        g.drawString("API ANAHTARI • QR", getWidth() / 2, 5, Graphics.TOP | Graphics.HCENTER);
+        g.drawString("API KEY • QR", getWidth() / 2, 5, Graphics.TOP | Graphics.HCENTER);
         g.setColor(0xFFFFFF); g.drawString(status, getWidth() / 2, getHeight() - 22, Graphics.TOP | Graphics.HCENTER);
     }
     protected void keyPressed(int key) {

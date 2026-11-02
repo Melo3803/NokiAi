@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+MIDlet-Name: noki Ai
+MIDlet-Version: 1.2.0
+MIDlet-Vendor: Buza
+MIDlet-1: noki Ai, /icon.png, cepai.CepAiMIDlet
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Description: Nokia E63 icin dogrudan Gemini sohbeti
+MIDlet-Permissions: javax.microedition.io.Connector.https
+MIDlet-Permissions-Opt: javax.microedition.media.control.VideoControl.getSnapshot, javax.microedition.io.Connector.file.read, javax.microedition.media.control.RecordControl
+MIDlet-Jar-URL: NokiAi.jar
+MIDlet-Jar-Size: 158350

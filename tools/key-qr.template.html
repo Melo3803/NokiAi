@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="tr"><meta charset="utf-8">
+<html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="referrer" content="no-referrer"><title>noki Ai — Anahtarı QR'a aktar</title>
+<meta name="referrer" content="no-referrer"><title>noki Ai — API key QR generator</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#101923;color:#f2f5f7;font:17px/1.5 system-ui,sans-serif}
 main{max-width:680px;margin:48px auto;padding:0 24px}small{color:#70deb4;letter-spacing:2px}h1{font-size:34px;line-height:1.2;margin:12px 0 18px}
@@ -11,16 +11,16 @@ button,a.download{display:inline-block;margin:16px 8px 0 0;padding:12px 18px;bor
 button.secondary{background:#263b4f;color:white}canvas{display:block;max-width:100%;height:auto;margin:24px auto;background:white;border:16px solid white;image-rendering:pixelated}
 #notice{color:#ffbd7b;min-height:26px}#result[hidden]{display:none}.note{font-size:14px}footer{margin-top:32px;border-top:1px solid #334658;padding-top:18px;color:#a9bacb;font-size:14px}
 </style>
-<main><small>noki Ai · NOKIA E63</small><h1>API anahtarını QR ile telefona aktar.</h1>
-<p>Google AI Studio anahtarını aşağıya yapıştır. QR bu sayfada, çevrimdışı oluşturulur. Anahtar herhangi bir siteye gönderilmez ve tarayıcıya kaydedilmez.</p>
-<label for="key">Google API anahtarı</label><input id="key" type="password" maxlength="200" autocomplete="off" spellcheck="false" autocapitalize="off">
-<button id="generate" type="button">QR oluştur</button><button id="clear" class="secondary" type="button">Temizle</button>
+<main><small>noki Ai · NOKIA E63</small><h1>Transfer your API key to your phone.</h1>
+<p>Paste your Google AI Studio key below. The QR is generated offline on this page. Your key is not sent anywhere or saved in your browser.</p>
+<label for="key">Google API key</label><input id="key" type="password" maxlength="200" autocomplete="off" spellcheck="false" autocapitalize="off">
+<button id="generate" type="button">Generate QR</button><button id="clear" class="secondary" type="button">Clear</button>
 <p id="notice" role="status"></p>
-<section id="result" hidden><canvas id="qr" width="444" height="444" aria-label="API anahtarı QR kodu"></canvas>
-<p>E63'te <b>Ayarlar → Kamerayla QR → Tara</b> seç. Kodu ekranda büyük göster; kamerayı çok yaklaştırma. Okuduktan sonra uygulamada <b>Kaydet</b>'e bas.</p>
-<a class="download" id="download" download="noki-ai-anahtar.png">QR PNG indir</a>
-<p class="note">Kamera okuyamazsa PNG'yi hafıza kartına aktar ve uygulamada <b>Ayarlar → QR dosyası</b> seç. QR dosyası API anahtarını içerir; işin bitince sil ve paylaşma.</p></section>
-<footer>Bu araç yalnızca bir defalık anahtar aktarımı içindir. Sohbet sırasında bilgisayar açık kalmaz; E63 doğrudan Google'a bağlanır. Sayfayı kapatınca buradaki anahtar temizlenir.</footer></main>
+<section id="result" hidden><canvas id="qr" width="444" height="444" aria-label="API key QR code"></canvas>
+<p>On your phone, open <b>Menu → Settings → Menu → Scan QR</b>. Show a large QR and keep the camera at a comfortable distance. After scanning, press <b>Save</b>.</p>
+<a class="download" id="download" download="noki-ai-key.png">Download QR PNG</a>
+<p class="note">If scanning fails, copy the PNG to your memory card and choose <b>Settings → Menu → QR file</b>. The image contains your API key. Delete it when finished and do not share it.</p></section>
+<footer>This tool is for one-time key setup. Your phone connects directly to Google during chat, with no computer needed. Closing this page clears the key.</footer></main>
 <script>
 /* QR_LIBRARY */
 </script>
@@ -29,14 +29,14 @@ button.secondary{background:#263b4f;color:white}canvas{display:block;max-width:1
 const input=document.getElementById('key'), notice=document.getElementById('notice'), result=document.getElementById('result'), canvas=document.getElementById('qr'), download=document.getElementById('download');
 document.getElementById('generate').addEventListener('click',()=>{
   const key=input.value.trim();
-  if(!/^[A-Za-z0-9_.=+\/-]{20,200}$/.test(key)){notice.textContent='Anahtarı kontrol et. Web adresi veya boşluk içermemeli.';result.hidden=true;download.removeAttribute('href');return;}
+  if(!/^[A-Za-z0-9_.=+\/-]{20,200}$/.test(key)){notice.textContent='Check the API key. It must not contain a web address or spaces.';result.hidden=true;download.removeAttribute('href');return;}
   const code=qrcode(0,'M');code.addData(key,'Byte');code.make();
   const count=code.getModuleCount(), quiet=4, scale=Math.max(4,Math.floor(444/(count+quiet*2))), size=(count+quiet*2)*scale;
   canvas.width=canvas.height=size;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.fillStyle='#000';
   for(let r=0;r<count;r++)for(let c=0;c<count;c++)if(code.isDark(r,c))ctx.fillRect((c+quiet)*scale,(r+quiet)*scale,scale,scale);
-  download.href=canvas.toDataURL('image/png');result.hidden=false;notice.textContent='QR hazır. Kamerayla okuyabilir veya PNG olarak indirebilirsin.';
+  download.href=canvas.toDataURL('image/png');result.hidden=false;notice.textContent='QR ready. Scan it with your phone or download the PNG.';
 });
-document.getElementById('clear').addEventListener('click',()=>{input.value='';canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);download.removeAttribute('href');result.hidden=true;notice.textContent='Anahtar ve QR temizlendi.';input.focus();});
+document.getElementById('clear').addEventListener('click',()=>{input.value='';canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);download.removeAttribute('href');result.hidden=true;notice.textContent='Key and QR cleared.';input.focus();});
 addEventListener('pagehide',()=>{input.value='';download.removeAttribute('href');canvas.width=0;});
 </script></html>
 <!--

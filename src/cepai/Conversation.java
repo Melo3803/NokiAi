@@ -26,9 +26,9 @@ public final class Conversation {
     public synchronized String requestVoice(AudioClip clip) { return request("", clip); }
     private String request(String question, AudioClip clip) {
         StringBuffer json = new StringBuffer("{\"systemInstruction\":{\"parts\":[{\"text\":");
-        json.append(Json.quote("Sen noki Ai'sın. Yanıtların eski bir Nokia E63 ekranında okunuyor. "
-            + "Kullanıcının dilinde, varsayılan olarak Türkçe yanıt ver. Kısa, açık ve yararlı ol. "
-            + "Kullanıcı istemedikçe uzun tablolar ve karmaşık Markdown kullanma."));
+        json.append(Json.quote("You are noki Ai. Your replies are read on a small Nokia E63 screen. "
+            + "Reply in the user's language, defaulting to English if unclear. Be concise, clear and helpful. "
+            + "Avoid long tables and complex Markdown unless requested."));
         json.append("}]},\"contents\":[");
         for (int i = 0; i < users.size(); i++) {
             appendTurn(json, "user", user(i)); json.append(',');
@@ -37,8 +37,8 @@ public final class Conversation {
         if (clip == null) appendTurn(json, "user", question);
         else {
             json.append("{\"role\":\"user\",\"parts\":[{\"text\":");
-            json.append(Json.quote("Bu sesli soruyu dinle. Yalnızca JSON üret: heard alanına duyduğun konuşmayı, answer alanına sorunun yanıtını yaz. "
-                + "Yanıtı kısa tut, yaklaşık 1-3 cümle. Konuşma anlaşılmıyorsa heard ve answer boş olsun; duyulmayan sözleri uydurma."));
+            json.append(Json.quote("Listen to this voice question. Return only JSON: put the actual transcript in heard and the reply in answer. "
+                + "Keep the reply brief, about 1-3 sentences, in the speaker's language. If speech is unclear, leave heard and answer empty; never invent speech."));
             json.append("},{\"inlineData\":{\"mimeType\":\"audio/wav\",\"data\":");
             json.append(Json.quote(Base64.encode(clip.wav))); json.append("}}]}");
         }

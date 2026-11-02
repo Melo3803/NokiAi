@@ -25,7 +25,7 @@ public class AudioPlayback {
                 }
                 opened.addPlayerListener(new PlayerListener() { public void playerUpdate(Player source, String event, Object data) {
                     if (event.equals(PlayerListener.END_OF_MEDIA)) complete(token, listener, null);
-                    else if (event.equals(PlayerListener.ERROR)) complete(token, listener, "Ses oynatılamadı. Metin yanıtı ekranda duruyor.");
+                    else if (event.equals(PlayerListener.ERROR)) complete(token, listener, "Could not play audio. The text reply is still available.");
                 }});
                 VolumeControl volume = (VolumeControl) opened.getControl("VolumeControl");
                 if (volume != null) volume.setLevel(75);
@@ -33,7 +33,7 @@ public class AudioPlayback {
                 opened.start();
             } catch (Exception unsupported) {
                 if (opened != null) try { opened.close(); } catch (Exception ignored) { }
-                complete(token, listener, "Telefon WAV sesini oynatamadı. Metin yanıtını okuyabilirsin.");
+                complete(token, listener, "The phone could not play WAV audio. You can still read the text reply.");
             }
         }}).start();
     }

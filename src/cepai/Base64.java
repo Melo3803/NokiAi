@@ -17,18 +17,18 @@ public final class Base64 {
     }
     public static byte[] decode(String text, int limit) throws IOException {
         int n = text.length();
-        if (n % 4 != 0 || n > ((limit + 2) / 3) * 4) throw new IOException("Ses kodlaması/boyutu uygun değil.");
+        if (n % 4 != 0 || n > ((limit + 2) / 3) * 4) throw new IOException("Invalid audio encoding or size.");
         int padding = n > 0 && text.charAt(n - 1) == '=' ? 1 : 0;
         if (n > 1 && text.charAt(n - 2) == '=') padding++;
         int size = n / 4 * 3 - padding;
-        if (size > limit) throw new IOException("Ses çok büyük.");
+        if (size > limit) throw new IOException("Audio is too large.");
         byte[] out = new byte[size]; int at = 0;
         for (int i = 0; i < n; i += 4) {
             int value = 0;
             for (int j = 0; j < 4; j++) {
                 char c = text.charAt(i + j); int code = ALPHABET.indexOf(c);
                 if (c == '=' && i == n - 4 && i + j >= n - padding) code = 0;
-                if (code < 0) throw new IOException("Geçersiz base64.");
+                if (code < 0) throw new IOException("Invalid base64.");
                 value = (value << 6) | code;
             }
             if (at < size) out[at++] = (byte) (value >> 16);

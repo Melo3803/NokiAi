@@ -76,15 +76,15 @@ public final class EmulatorTest {
             MockHttps.nextStatus=403;
             command("probe",da.getCurrent());awaitJob();
             check(da.getCurrent() instanceof Alert,"keyless HTTPS probe reports result");
-            check(((Alert)da.getCurrent()).getTitle().equals("HTTPS çalışıyor"),"HTTP 403 still proves HTTPS channel");
+            check(((Alert)da.getCurrent()).getTitle().equals("HTTPS works"),"HTTP 403 still proves HTTPS channel");
             check(MockHttps.last.getRequestProperty("x-goog-api-key")==null,"probe sends no API key");
             dismiss();MockHttps.nextStatus=200;
             Class failures=app.getClass().getClassLoader().loadClass("cepai.ConnectionFailure");
             Method describe=failures.getMethod("describe",new Class[]{IOException.class,String.class,String.class});
             String detail=(String)describe.invoke(null,new Object[]{new IOException("native\r\n"+KEY),"HTTP yanıtı",KEY});
-            check(!detail.contains(KEY)&&detail.contains("anahtar gizlendi"),"native diagnostics redact API key");
+            check(!detail.contains(KEY)&&detail.contains("key hidden"),"native diagnostics redact API key");
             detail=(String)describe.invoke(null,new Object[]{new javax.microedition.pki.CertificateException(null,javax.microedition.pki.CertificateException.EXPIRED),"HTTPS",KEY});
-            check(detail.contains("tarih"),"certificate date failure distinguished");
+            check(detail.contains("date"),"certificate date failure distinguished");
             Class decoder=app.getClass().getClassLoader().loadClass("cepai.QrDecoder");
             Method decode=decoder.getMethod("decode",new Class[]{Image.class});
             String[] images={"qr-0.png","qr-rotated.png","qr-camera.jpg","qr-1.png"};
@@ -122,8 +122,8 @@ public final class EmulatorTest {
             check(((String)field(call(store,"load"),"key")).length()==0,"do not remember omits key from disk");
             check(((String)field(config,"key")).equals(KEY),"session key still available");
 
-            MockHttps.nextBody="{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"Merhaba! Bu bir emülatör test yanıtıdır.\"}]},\"finishReason\":\"STOP\"}]}";
-            question("Türkçe bir yanıt yaz.");awaitJob();
+            MockHttps.nextBody="{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"Hi! How can I help you today?\"}]},\"finishReason\":\"STOP\"}]}";
+            question("Say hello in English — café.");awaitJob();
             Object conversation=field(app,"conversation");
             check(((Integer)call(conversation,"size")).intValue()==1,"successful API response enters context");
             MockHttps sent=MockHttps.last;
@@ -132,7 +132,7 @@ public final class EmulatorTest {
             check(!sent.getURL().toString().contains(KEY),"key absent from URL");
             check(KEY.equals(sent.getRequestProperty("x-goog-api-key")),"key sent in Google header");
             String request=sent.sent.toString("UTF-8");
-            check(request.contains("Türkçe")&&!request.contains(KEY),"UTF-8 body; no key in prompt");
+            check(request.contains("café")&&!request.contains(KEY),"UTF-8 body; no key in prompt");
             check(((String)field(app,"draft")).length()==0,"successful question clears draft");
             capture(new File(output,"03-chat-synthetic.png"));
 
@@ -172,7 +172,7 @@ public final class EmulatorTest {
             check(field(app,"voiceScreen")==null,"successful send releases recorded clip");
 
             MockHttps.nextStatus=429;command("readAnswer",da.getCurrent());awaitJob();
-            check(da.getCurrent() instanceof Alert&&da.getCurrent().getTitle().equals("Seslendirme"),"TTS quota failure explained separately");
+            check(da.getCurrent() instanceof Alert&&da.getCurrent().getTitle().equals("Text to speech"),"TTS quota failure explained separately");
             check(MockHttps.last.getURL().getPath().contains("tts:generateContent"),"read-aloud uses dedicated TTS model");
             check(MockHttps.last.sent.toString("UTF-8").contains("responseModalities"),"TTS audio request built");
             check(((Integer)call(conversation,"size")).intValue()==2,"TTS failure preserves conversation");dismiss();

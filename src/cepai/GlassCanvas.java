@@ -29,7 +29,7 @@ abstract class GlassCanvas extends Canvas {
         return null;
     }
     protected void select() { fire(primaryCommand()); }
-    protected String centerLabel() { return "Seç"; }
+    protected String centerLabel() { return "Select"; }
     protected abstract void content(Graphics g);
     protected abstract void navigate(int action);
     protected String heading() { return "noki Ai"; }
@@ -51,11 +51,11 @@ abstract class GlassCanvas extends Canvas {
         g.setColor(0x101B2B); g.fillRect(0, y, getWidth(), FOOT);
         g.setColor(0x354B60); g.drawLine(0, y, getWidth(), y);
         Command primary = primaryCommand();
-        String left = menuOpen ? "Seç" : (primary == null ? "" : primary.getLabel());
+        String left = menuOpen ? "Select" : (primary == null ? "" : primary.getLabel());
         GlassTheme.text(g, GlassTheme.fit(left, GlassTheme.BOLD, getWidth() / 3 - 14), 12, y + 6, GlassTheme.BOLD, GlassTheme.MINT);
         String middle = menuOpen ? (menuIndex + 1) + "/" + actions.size() : centerLabel();
         GlassTheme.text(g, middle, (getWidth() - GlassTheme.SMALL.stringWidth(middle)) / 2, y + 6, GlassTheme.SMALL, GlassTheme.MUTED);
-        String right = menuOpen ? "Kapat" : "Menü";
+        String right = menuOpen ? "Close" : "Menu";
         GlassTheme.text(g, right, getWidth() - GlassTheme.BOLD.stringWidth(right) - 12, y + 6, GlassTheme.BOLD, GlassTheme.INK);
     }
     private int menuRows() { return Math.max(1, (getHeight() - FOOT - TOP - 32) / 24); }
@@ -68,7 +68,7 @@ abstract class GlassCanvas extends Canvas {
         menuStart = Math.min(menuStart, Math.max(0, actions.size() - rows));
         int h = rows * 24 + 28, y = getHeight() - FOOT - h - 5;
         theme.panel(g, 10, y, getWidth() - 20, h, false);
-        GlassTheme.text(g, "KISAYOLLAR", 23, y + 6, GlassTheme.BOLD, GlassTheme.MINT);
+        GlassTheme.text(g, "SHORTCUTS", 23, y + 6, GlassTheme.BOLD, GlassTheme.MINT);
         for (int i = 0; i < rows; i++) {
             int index = menuStart + i, rowY = y + 24 + i * 24;
             if (index == menuIndex) {

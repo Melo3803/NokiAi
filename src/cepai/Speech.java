@@ -14,7 +14,7 @@ public final class Speech {
     public static String request(String answer, String model) {
         StringBuffer out = new StringBuffer("{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":");
         out.append(Json.quote(spokenText(answer)));
-        if (model.startsWith("gemini-3.8-")) out.append(",\"speechMetadata\":{\"style\":\"Doğal ve anlaşılır bir sesle oku.\"}");
+        if (model.startsWith("gemini-3.8-")) out.append(",\"speechMetadata\":{\"style\":\"Read naturally and clearly in the language of the text.\"}");
         out.append("}]}],\"generationConfig\":{\"responseModalities\":[\"AUDIO\"],\"speechConfig\":{\"voiceConfig\":");
         out.append(model.startsWith("gemini-3.8-") ? "{\"voice\":\"Kore\"}" : "{\"prebuiltVoiceConfig\":{\"voiceName\":\"Kore\"}}");
         out.append("}}}"); return out.toString();
@@ -22,15 +22,15 @@ public final class Speech {
     public static String[] voiceAnswer(String json) throws IOException {
         Hashtable object = Json.object(Json.parse(GoogleResponse.answer(json)));
         String heard = Json.text(object.get("heard")).trim(), answer = Json.text(object.get("answer")).trim();
-        if (heard.length() == 0 || answer.length() == 0) throw new IOException("Konuşma anlaşılamadı. Daha net ve kısa bir kayıt dene.");
-        if (heard.length() > 2048 || answer.length() > 10000) throw new IOException("Sesli yanıt boyutu uygun değil.");
+        if (heard.length() == 0 || answer.length() == 0) throw new IOException("Speech was not understood. Try a shorter, clearer recording.");
+        if (heard.length() > 2048 || answer.length() > 10000) throw new IOException("Invalid voice reply size.");
         return new String[] { heard, answer };
     }
     public static AudioClip audio(String json) throws IOException {
         Hashtable root = Json.object(Json.parse(json, MAX_JSON)); Vector candidates = Json.array(root.get("candidates"));
-        if (candidates.size() == 0) throw new IOException("Google ses üretmedi. TTS modelini ve kotanı kontrol et.");
+        if (candidates.size() == 0) throw new IOException("Google returned no audio. Check the TTS model and quota.");
         Hashtable candidate = Json.object(candidates.elementAt(0));
-        if ("MAX_TOKENS".equals(candidate.get("finishReason"))) throw new IOException("Ses yanıtı yarım kaldı. Daha kısa bir yanıtı dinlemeyi dene.");
+        if ("MAX_TOKENS".equals(candidate.get("finishReason"))) throw new IOException("Audio reply was incomplete. Try reading a shorter reply aloud.");
         Vector parts = Json.array(Json.object(candidate.get("content")).get("parts"));
         for (int i = 0; i < parts.size(); i++) {
             Hashtable part = Json.object(parts.elementAt(i));
@@ -44,12 +44,12 @@ public final class Speech {
                 int rate = 24000, at = mime.indexOf("rate=");
                 if (at >= 0) {
                     int end = mime.indexOf(';', at); String value = mime.substring(at + 5, end < 0 ? mime.length() : end).trim();
-                    try { rate = Integer.parseInt(value); } catch (NumberFormatException invalid) { throw new IOException("Ses örnekleme hızı geçersiz."); }
+                    try { rate = Integer.parseInt(value); } catch (NumberFormatException invalid) { throw new IOException("Invalid audio sample rate."); }
                 }
                 return AudioClip.fromPcm(data, rate, 30000);
             }
-            throw new IOException("Google'ın döndürdüğü ses biçimi desteklenmiyor.");
+            throw new IOException("Google returned an unsupported audio format.");
         }
-        throw new IOException("Yanıtta ses bulunamadı. TTS modelini ve API erişimini kontrol et.");
+        throw new IOException("No audio found in the reply. Check the TTS model and API access.");
     }
 }
